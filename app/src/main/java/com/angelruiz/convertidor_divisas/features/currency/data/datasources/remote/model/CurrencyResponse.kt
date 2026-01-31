@@ -2,7 +2,8 @@ package com.angelruiz.convertidor_divisas.features.currency.data.datasources.rem
 import com.google.gson.annotations.SerializedName
 
 data class CurrencyResponse(
-    @SerializedName("result") val result: String,
-    @SerializedName("base_code") val baseCode: String,
-    @SerializedName("conversion_rates") val conversionRates: Map<String, Double>
+    @SerializedName("amount") val amount: Double,
+    @SerializedName("base") val base: String,
+    @SerializedName("date") val date: String,
+    @SerializedName("rates") val rates: Map<String, Double>
 )

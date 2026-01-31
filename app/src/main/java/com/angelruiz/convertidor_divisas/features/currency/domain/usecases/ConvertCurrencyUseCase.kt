@@ -1,20 +1,25 @@
 package com.angelruiz.convertidor_divisas.features.currency.domain.usecases
+
 import com.angelruiz.convertidor_divisas.features.currency.domain.repositories.CurrencyRepository
-import kotlin.collections.find
+import com.angelruiz.convertidor_divisas.features.currency.data.repositories.CurrencyRepositoryImpl // Necesario si no tienes interfaz para historial
 
-class ConvertCurrencyUseCase(
-    private val repository: CurrencyRepository
-) {
+class ConvertCurrencyUseCase(private val repository: CurrencyRepository) {
+
+    // Tu función existente de conversión
     suspend operator fun invoke(amount: Double, from: String, to: String): Result<Double> {
-        if (amount <= 0) return Result.failure(Exception("La cantidad debe ser mayor a 0"))
+        val ratesResult = repository.getExchangeRates(from)
+        return ratesResult.mapCatching { rates ->
+            val rate = rates.find { it.code == to }?.rate ?: throw Exception("Moneda no encontrada")
+            amount * rate
+        }
+    }
 
-        val result = repository.getExchangeRates(from)
-
-        return result.mapCatching { rates ->
-            val targetRate = rates.find { it.code == to }?.rate
-                ?: throw Exception("No se encontró la tasa para $to")
-
-            amount * targetRate
+    // Nueva función para el historial (Cast seguro al Impl para acceder al método nuevo)
+    suspend fun getHistory(from: String, to: String): List<Double> {
+        return if (repository is CurrencyRepositoryImpl) {
+            repository.getHistory7Days(from, to)
+        } else {
+            emptyList()
         }
     }
 }

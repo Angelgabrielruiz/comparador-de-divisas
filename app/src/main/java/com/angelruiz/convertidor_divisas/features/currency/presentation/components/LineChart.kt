@@ -84,7 +84,7 @@ fun LineChart(
                 drawContext.canvas.nativeCanvas.drawText(
                     String.format(Locale.US, "%.2f", value), // Solo 2 decimales
                     x,
-                    normalizedY - 20f, // Un poco más arriba del punto
+                    normalizedY - 20f,
                     textPaint
                 )
 
@@ -105,7 +105,6 @@ fun LineChart(
                 style = Stroke(width = 5f)
             )
 
-            // Gradiente de relleno (Efecto visual bonito)
             val fillPath = Path()
             fillPath.addPath(path)
             fillPath.lineTo(width, height - paddingVertical)

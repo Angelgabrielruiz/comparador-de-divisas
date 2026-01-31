@@ -37,7 +37,7 @@ fun ConverterScreen(factory: ConverterViewModelFactory) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Conversor Clean Arch", fontWeight = FontWeight.Bold) },
+                title = { Text("Conversor de divisas", fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
@@ -119,7 +119,7 @@ fun ConverterScreen(factory: ConverterViewModelFactory) {
 
                 // Historial
                 Text(
-                    text = "Historial (Simulado 7 días)",
+                    text = "Valor de los ultimos 7 dias",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.align(Alignment.Start)
