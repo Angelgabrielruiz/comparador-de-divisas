@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.random.Random // <--- IMPORTANTE: Necesario para simular datos
 
 class ConverterViewModel(
     private val convertCurrencyUseCase: ConvertCurrencyUseCase
 ) : ViewModel() {
 
-    // 1. AÑADIMOS LA LISTA DE MONEDAS AQUÍ
     val supportedCurrencies = listOf("USD", "MXN", "EUR", "GBP", "JPY", "CAD", "AUD", "CNY", "BRL")
 
     private val _uiState = MutableStateFlow(ConverterUiState())
@@ -33,7 +33,16 @@ class ConverterViewModel(
             _uiState.update { state ->
                 result.fold(
                     onSuccess = { total ->
-                        state.copy(isLoading = false, result = total, error = null)
+                        // --- AQUÍ ESTABA EL FALTANTE ---
+                        // Generamos los datos simulados para el gráfico
+                        val fakeHistory = generateFakeHistory(total)
+
+                        state.copy(
+                            isLoading = false,
+                            result = total,
+                            historyData = fakeHistory, // <--- Guardamos la lista llena
+                            error = null
+                        )
                     },
                     onFailure = { error ->
                         state.copy(isLoading = false, error = error.message)
@@ -41,5 +50,17 @@ class ConverterViewModel(
                 )
             }
         }
+    }
+
+    // --- FUNCIÓN NUEVA PARA CREAR DATOS DEL GRÁFICO ---
+    private fun generateFakeHistory(currentValue: Double): List<Double> {
+        val history = mutableListOf<Double>()
+        // Generamos 7 días de datos simulados
+        for (i in 0..6) {
+            // Variación aleatoria pequeña (entre 98% y 102% del valor real)
+            val randomFactor = Random.nextDouble(0.98, 1.02)
+            history.add(currentValue * randomFactor)
+        }
+        return history
     }
 }

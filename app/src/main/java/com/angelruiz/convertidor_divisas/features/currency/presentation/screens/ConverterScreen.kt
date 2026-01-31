@@ -1,7 +1,9 @@
 package com.angelruiz.convertidor_divisas.features.currency.presentation.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState // <--- IMPORTANTE
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll // <--- IMPORTANTE
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
@@ -15,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.angelruiz.convertidor_divisas.features.currency.presentation.components.ResultCard
+import com.angelruiz.convertidor_divisas.features.currency.presentation.components.LineChart
 import com.angelruiz.convertidor_divisas.features.currency.presentation.viewmodels.ConverterViewModel
 import com.angelruiz.convertidor_divisas.features.currency.presentation.viewmodels.ConverterViewModelFactory
 
@@ -25,11 +28,9 @@ fun ConverterScreen(factory: ConverterViewModelFactory) {
     val viewModel: ConverterViewModel = viewModel(factory = factory)
     val state by viewModel.uiState.collectAsState()
 
-    // 1. OBTENEMOS LA LISTA DESDE EL VIEWMODEL
     val currencies = viewModel.supportedCurrencies
 
     var amount by remember { mutableStateOf("") }
-    // Inicializamos con valores de la lista
     var fromCurrency by remember { mutableStateOf("USD") }
     var toCurrency by remember { mutableStateOf("MXN") }
 
@@ -47,7 +48,8 @@ fun ConverterScreen(factory: ConverterViewModelFactory) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()), // <--- ¡AQUÍ ESTÁ LA SOLUCIÓN!
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top
         ) {
@@ -64,10 +66,7 @@ fun ConverterScreen(factory: ConverterViewModelFactory) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 2. REEMPLAZAMOS LOS INPUTS MANUALES POR DROPDOWNS
-            // Usamos un Row para ponerlos uno al lado del otro, o Column para vertical.
-            // Aquí los pongo vertical para que se vean mejor los nombres.
-
+            // Dropdowns
             CurrencyDropdown(
                 label = "Desde",
                 options = currencies,
@@ -103,7 +102,7 @@ fun ConverterScreen(factory: ConverterViewModelFactory) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Resultado
+            // Resultados
             if (state.error != null) {
                 Text(
                     text = state.error ?: "Error desconocido",
@@ -115,12 +114,30 @@ fun ConverterScreen(factory: ConverterViewModelFactory) {
                     resultAmount = state.result,
                     currencyCode = toCurrency
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Historial
+                Text(
+                    text = "Historial (Simulado 7 días)",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Start)
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LineChart(
+                    data = state.historyData
+                )
+
+                // Un pequeño espacio extra al final para que no quede pegado al borde
+                Spacer(modifier = Modifier.height(20.dp))
             }
         }
     }
 }
 
-// 3. COMPONENTE REUTILIZABLE PARA EL DROPDOWN
 @Composable
 fun CurrencyDropdown(
     label: String,
@@ -133,9 +150,9 @@ fun CurrencyDropdown(
     Box(modifier = Modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = selectedCurrency,
-            onValueChange = {}, // No dejamos escribir, solo seleccionar
+            onValueChange = {},
             label = { Text(label) },
-            readOnly = true, // Teclado oculto
+            readOnly = true,
             trailingIcon = {
                 IconButton(onClick = { expanded = true }) {
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "Seleccionar")
